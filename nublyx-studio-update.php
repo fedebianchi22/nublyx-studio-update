@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 define( 'NSU_VERSION',    '1.1.0' );
 define( 'NSU_FILE',       __FILE__ );
 // Repo de GitHub desde donde los sitios reciben las actualizaciones del plugin (formato owner/repo).
-define( 'NSU_GITHUB_REPO', 'OWNER/nublyx-studio-update' );
+define( 'NSU_GITHUB_REPO', 'fedebianchi22/nublyx-studio-update' );
 define( 'NSU_PATH',       plugin_dir_path( __FILE__ ) );
 define( 'NSU_URL',        plugin_dir_url( __FILE__ ) );
 define( 'NSU_BACKUP_DIR', WP_CONTENT_DIR . '/nublyx-backups' );
