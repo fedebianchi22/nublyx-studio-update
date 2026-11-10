@@ -1,0 +1,4 @@
+[
+  { "name": "Cliente Uno", "url": "https://cliente1.com", "hub_token": "TOKEN_DEL_PLUGIN_EN_ESE_SITIO" },
+  { "name": "Cliente Dos", "url": "https://cliente2.com", "hub_token": "OTRO_TOKEN" }
+]

@@ -1,0 +1,40 @@
+name: Mantenimiento semanal WordPress
+
+on:
+  schedule:
+    # Domingos 03:00 hora Argentina (UTC-3) = 06:00 UTC. GitHub usa SIEMPRE UTC.
+    - cron: "0 6 * * 0"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "full = backup + actualizar | check = solo verificar conexión (no modifica nada)"
+        type: choice
+        options: [full, check]
+        default: full
+
+concurrency:
+  group: wp-maintenance
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Instalar dependencias
+        run: npm install --prefix scripts --no-audit --no-fund
+      - name: Ejecutar mantenimiento
+        env:
+          SITES_JSON: ${{ secrets.SITES_JSON }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          MAIL_FROM: ${{ secrets.MAIL_FROM }}
+          MAIL_TO: ${{ secrets.MAIL_TO }}
+          MODE: ${{ inputs.mode || 'full' }}
+        run: node scripts/run.mjs

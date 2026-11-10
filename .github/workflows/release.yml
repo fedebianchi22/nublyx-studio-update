@@ -1,0 +1,31 @@
+name: Publicar release del plugin
+
+# Al pushear un tag vX.Y.Z se genera el zip y los sitios ven la actualización en Plugins.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verificar que el tag coincide con la versión del plugin
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          VER=$(grep -m1 "Version:" nublyx-studio-update.php | sed 's/.*Version:[[:space:]]*//' | tr -d '\r')
+          CONST=$(grep -m1 "define( 'NSU_VERSION'" nublyx-studio-update.php | sed "s/.*'\([0-9][^']*\)'.*/\1/")
+          echo "tag=$TAG header=$VER const=$CONST"
+          [ "$TAG" = "$VER" ] && [ "$TAG" = "$CONST" ] || { echo "El tag, el header y NSU_VERSION deben coincidir"; exit 1; }
+      - name: Armar zip (carpeta nublyx-studio-update/)
+        run: |
+          mkdir -p build/nublyx-studio-update
+          cp -r nublyx-studio-update.php admin endpoints includes build/nublyx-studio-update/
+          (cd build && zip -r ../nublyx-studio-update.zip nublyx-studio-update)
+      - name: Crear release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" nublyx-studio-update.zip --title "$GITHUB_REF_NAME" --generate-notes
