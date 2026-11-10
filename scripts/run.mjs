@@ -10,9 +10,21 @@ const UPDATE_TIMEOUT = 15 * 60_000;
 
 /* ───────────── Sitios ───────────── */
 function loadSites() {
-  const raw = process.env.SITES_JSON || (fs.existsSync('sites.json') ? fs.readFileSync('sites.json', 'utf8') : '');
-  if (!raw) throw new Error('Falta SITES_JSON (secret) o sites.json local.');
-  const list = JSON.parse(raw);
+  let list = [];
+  // Preferido: un secret por sitio, llamados SITE_<NOMBRE>, cada uno con el JSON de UN sitio.
+  if (process.env.ALL_SECRETS) {
+    const all = JSON.parse(process.env.ALL_SECRETS);
+    for (const [key, value] of Object.entries(all).sort(([a], [b]) => a.localeCompare(b))) {
+      if (!key.startsWith('SITE_')) continue;
+      try { list.push(JSON.parse(value)); } catch { throw new Error(`El secret ${key} no es un JSON válido.`); }
+    }
+  }
+  // Alternativa: arreglo completo en SITES_JSON o sites.json local (pruebas).
+  if (!list.length) {
+    const raw = process.env.SITES_JSON || (fs.existsSync('sites.json') ? fs.readFileSync('sites.json', 'utf8') : '');
+    if (raw) list = JSON.parse(raw);
+  }
+  if (!list.length) throw new Error('No hay sitios: creá secrets SITE_<NOMBRE> (o SITES_JSON).');
   return list.map((s, i) => {
     if (!s.url || !s.hub_token) throw new Error(`Sitio #${i + 1}: requiere "url" y "hub_token".`);
     return { name: s.name || s.url, url: s.url.replace(/\/+$/, ''), token: s.hub_token };

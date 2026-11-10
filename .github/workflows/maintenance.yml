@@ -29,7 +29,8 @@ jobs:
         run: npm install --prefix scripts --no-audit --no-fund
       - name: Ejecutar mantenimiento
         env:
-          SITES_JSON: ${{ secrets.SITES_JSON }}
+          # Expone los secrets SITE_* (uno por sitio) sin tener que listarlos acá.
+          ALL_SECRETS: ${{ toJSON(secrets) }}
           SMTP_HOST: ${{ secrets.SMTP_HOST }}
           SMTP_PORT: ${{ secrets.SMTP_PORT }}
           SMTP_USER: ${{ secrets.SMTP_USER }}
